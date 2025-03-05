@@ -28,10 +28,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,6 +73,20 @@ fun PokedexScreen(navController: NavController, viewModel: PokemonViewModel = vi
     val error by viewModel.error.collectAsState()
 
     var pokemonName by remember { mutableStateOf("") }
+
+    var showEmptyFieldError by remember { mutableStateOf(false) }
+
+    // Estado para controlar la visibilidad del Snackbar
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Lanzar el Snackbar cuando showEmptyFieldError sea true
+    LaunchedEffect(showEmptyFieldError) {
+        if (showEmptyFieldError) {
+            snackbarHostState.showSnackbar("El campo de búsqueda no puede estar vacío")
+            // Reiniciar el estado después de mostrar el Snackbar
+            showEmptyFieldError = false
+        }
+    }
 
     Scaffold (
         topBar = {
@@ -172,13 +188,7 @@ fun PokedexScreen(navController: NavController, viewModel: PokemonViewModel = vi
                                             tint = if (isFavorite) Color.Yellow else Color.Gray
                                         )
                                     }
-                                    IconButton(onClick = { viewModel.removeFromFavorites() }) {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = "Eliminar de favoritos",
-                                            tint = Color.Red
-                                        )
-                                    }
+
                                 }
 
 
@@ -266,7 +276,14 @@ fun PokedexScreen(navController: NavController, viewModel: PokemonViewModel = vi
                     )
 
                     Button(
-                        onClick = { viewModel.fetchPokemon(pokemonName)},
+                        onClick = { if (pokemonName.isBlank()) {
+                            // Mostrar error si el campo está vacío
+                            showEmptyFieldError = true
+                        } else {
+                            // Realizar la búsqueda si el campo no está vacío
+                            showEmptyFieldError = false
+                            viewModel.fetchPokemon(pokemonName)}
+                        },
                         modifier = Modifier
                             .weight(0.3f)
                             .height(48.dp)
