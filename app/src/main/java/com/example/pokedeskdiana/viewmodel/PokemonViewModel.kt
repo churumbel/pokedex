@@ -13,8 +13,10 @@ import com.example.pokedeskdiana.data.FavoritePokemonRepository
 import com.example.pokedeskdiana.data.PokemonDatabase
 import com.example.pokedeskdiana.model.Pokemon
 
-class PokemonViewModel(application: Application) : AndroidViewModel(application) {
-    private val favoriteRepository: FavoritePokemonRepository
+class PokemonViewModel(
+    application: Application,
+    private val favoriteRepository: FavoritePokemonRepository) : AndroidViewModel(application) {
+    //private val favoriteRepository: FavoritePokemonRepository
 
     // Estados
     private val _pokemon = MutableStateFlow<Pokemon?>(null)
@@ -30,8 +32,9 @@ class PokemonViewModel(application: Application) : AndroidViewModel(application)
     open val isFavorite: StateFlow<Boolean> = _isFavorite.asStateFlow()
 
     init {
-        val pokemonDao = PokemonDatabase.getDatabase(application).favoritePokemonDao()
-        favoriteRepository = FavoritePokemonRepository(pokemonDao)
+        // No se inicializa el repositorio aquí, ahora viene desde la Factory
+        //val pokemonDao = PokemonDatabase.getDatabase(application).favoritePokemonDao()
+        //favoriteRepository = FavoritePokemonRepository(pokemonDao)
     }
 
     // Función para buscar un Pokémon
