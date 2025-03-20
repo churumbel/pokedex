@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             PokedeskDianaTheme {
-                NavGraph()
+                NavGraph(pokemonViewModel, favoritePokemonViewModel)
             }
 
         }

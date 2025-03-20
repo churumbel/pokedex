@@ -1,6 +1,7 @@
 package com.example.pokedeskdiana.data
 
 import android.content.Context
+import com.example.pokedeskdiana.api.ApiPokemonRepository
 import com.example.pokedeskdiana.api.PokeApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -19,7 +20,7 @@ class DefaultAppContainer(context: Context) : AppContainer {
     }
 
     override val pokemonRepository: PokemonRepository by lazy {
-        NetworkPokemonRepository(pokeApiService) // Implementación que usa la API
+        ApiPokemonRepository(pokeApiService)
     }
 
     // Configuración de Room

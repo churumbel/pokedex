@@ -14,10 +14,10 @@ import com.example.pokedeskdiana.viewmodel.FavoritePokemonViewModel
 import com.example.pokedeskdiana.viewmodel.PokemonViewModel
 
 @Composable
-fun NavGraph() {
+fun NavGraph(pokemonViewModel: PokemonViewModel, favoritePokemonViewModel: FavoritePokemonViewModel) {
     val navController = rememberNavController()
-    val pokemonViewModel: PokemonViewModel = viewModel()
-    val favoritePokemonViewModel: FavoritePokemonViewModel = viewModel()
+    val pokemonViewModel =pokemonViewModel
+    val favoritePokemonViewModel=favoritePokemonViewModel
 
     NavHost(navController, startDestination = "welcome") {
         composable("welcome") { WelcomeScreen(navController) }

@@ -56,12 +56,18 @@ class PokemonViewModel(
         }
     }
 
-    fun addToFavorites() {
+    fun addToFavorites(onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
-            _pokemon.value?.let {
-                favoriteRepository.addFavorite(FavoritePokemon(it.id, it.name, it.sprites.front_default))
-                _isFavorite.value = true
-            }
+            _pokemon.value?.let { pokemon ->
+                if (favoriteRepository.isFavorite(pokemon.id)) {
+                    // El Pokémon ya está en favoritos
+                    onResult(false)
+                } else {
+                    favoriteRepository.addFavorite(FavoritePokemon(pokemon.id, pokemon.name, pokemon.sprites.front_default))
+                    _isFavorite.value = true
+                    onResult(true)
+                }
+            } ?: onResult(false) // En caso de que no haya Pokémon
         }
     }
 

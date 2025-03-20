@@ -1,6 +1,6 @@
 package com.example.pokedeskdiana.screens
 
-import androidx.compose.foundation.Image
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -18,16 +18,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -41,18 +40,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.pokedeskdiana.viewmodel.PokemonViewModel
 import coil.compose.AsyncImage
-import com.example.pokedeskdiana.R
 import com.example.pokedeskdiana.model.Ability
 import com.example.pokedeskdiana.model.AbilityDetail
 import com.example.pokedeskdiana.model.Pokemon
@@ -61,12 +56,13 @@ import com.example.pokedeskdiana.model.Sprites
 import com.example.pokedeskdiana.model.Stat
 import com.example.pokedeskdiana.model.StatDetail
 import com.example.pokedeskdiana.model.TypeDetail
-import com.example.pokedeskdiana.ui.theme.PokedeskDianaTheme
 import kotlinx.coroutines.flow.MutableStateFlow
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PokedexScreen(navController: NavController, viewModel: PokemonViewModel = viewModel()) {
+    val context = LocalContext.current
     val pokemon by viewModel.pokemon.collectAsState()
     val isFavorite by viewModel.isFavorite.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -100,7 +96,8 @@ fun PokedexScreen(navController: NavController, viewModel: PokemonViewModel = vi
             )
 
         //PokedexTopBar()
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ){ paddingValues ->
         Box(
             modifier = Modifier
@@ -181,7 +178,13 @@ fun PokedexScreen(navController: NavController, viewModel: PokemonViewModel = vi
                                 )
                                 // Botón de favoritos
                                 Row {
-                                    IconButton(onClick = { viewModel.addToFavorites() }) {
+                                    IconButton(onClick = {
+                                        viewModel.addToFavorites { wasAdded ->
+                                            if (!wasAdded) {
+                                                Toast.makeText(context, "Ya está en favoritos", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    }) {
                                         Icon(
                                             imageVector = Icons.Default.Star,
                                             contentDescription = "Agregar a favoritos",
@@ -313,52 +316,6 @@ fun PokedexScreen(navController: NavController, viewModel: PokemonViewModel = vi
 
 }
 
-@Composable
-fun PokedexTopBar() {
-    Column {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFFB71C1C))
-                .padding(16.dp),
-
-
-            ) {
-            // Espacio a la izquierda para el texto
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                // Texto "Pokedex de Diana"
-                Text(
-                    text = "Pokedex de Diana",
-                    color = Color.White,
-                    modifier = Modifier.weight(1f) // Esto hace que el texto ocupe el espacio restante
-                )
-
-                // Imagen de la Poké Ball
-                Image(
-                    painter = painterResource(R.drawable.png_transparent_poke_ball_thumbnail),
-                    contentDescription = "Poké Ball",
-                    // Puedes ajustar el tamaño de la imagen
-                    modifier = Modifier.size(50.dp)
-                        .clip(CircleShape)
-
-                        .background(Color.Transparent) // Asegura que el fondo del contenedor sea transparente
-                )
-            }
-        }
-        // Línea blanca para separar el TopBar del resto del contenido
-        HorizontalDivider(
-            modifier = Modifier.fillMaxWidth(),
-            thickness = 1.dp,
-            color = Color.White
-        )
-    }
-}
-
 
 class FakePokemonViewModel : ViewModel() {
     val pokemon = MutableStateFlow(
@@ -371,7 +328,6 @@ class FakePokemonViewModel : ViewModel() {
             stats = listOf(Stat(35, StatDetail("hp")))
         )
     )
-
     val isLoading = MutableStateFlow(false)
     val error = MutableStateFlow(false)
     val isFavorite = MutableStateFlow(false) // Ahora sí lo tenemos
